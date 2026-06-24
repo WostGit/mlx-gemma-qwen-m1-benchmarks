@@ -40,25 +40,23 @@ jobs:
       - name: Benchmark Gemma-4-E2B (MLX 4-bit)
         run: |
           echo "=== Gemma-4-E2B-it 4-bit ==="
-          python -m mlx_lm.generate \
+          mlx_lm.generate \
             --model mlx-community/gemma-4-e2b-it-4bit \
             --prompt "Explain tokens per second benchmarking on Apple Silicon in detail." \
             --max-tokens 256 \
             --temp 0.0 \
-            --seed 42 \
-            --verbose
+            --seed 42
 
       - name: Benchmark Qwen3.6-2B (or closest 2B variant, MLX)
         run: |
           echo "=== Qwen ~2B (Qwen3.5-2B or Qwen3-2B equivalent) ==="
           # Use a suitable small Qwen MLX variant (adjust if exact 3.6-2B available)
-          python -m mlx_lm.generate \
+          mlx_lm.generate \
             --model mlx-community/Qwen3.5-2B-4bit \
             --prompt "Explain tokens per second benchmarking on Apple Silicon in detail." \
             --max-tokens 256 \
             --temp 0.0 \
-            --seed 42 \
-            --verbose
+            --seed 42
 
       - name: Summary & System Info
         run: |
