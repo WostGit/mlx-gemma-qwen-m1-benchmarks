@@ -1,0 +1,73 @@
+name: Apple Silicon LLM Benchmarks (Gemma4-E2B + Qwen3.6-2B)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  benchmark:
+    runs-on: macos-latest  # Apple Silicon (M-series)
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache MLX models and pip
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/huggingface
+            ~/.cache/mlx
+            ~/Library/Caches/pip
+          key: ${{ runner.os }}-mlx-models-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-mlx-models-
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install mlx-lm mlx-vlm
+
+      - name: Benchmark Gemma-4-E2B (MLX 4-bit)
+        run: |
+          echo "=== Gemma-4-E2B-it 4-bit ==="
+          python -m mlx_lm.generate \
+            --model mlx-community/gemma-4-e2b-it-4bit \
+            --prompt "Explain tokens per second benchmarking on Apple Silicon in detail." \
+            --max-tokens 256 \
+            --temp 0.0 \
+            --seed 42 \
+            --verbose
+
+      - name: Benchmark Qwen3.6-2B (or closest 2B variant, MLX)
+        run: |
+          echo "=== Qwen ~2B (Qwen3.5-2B or Qwen3-2B equivalent) ==="
+          # Use a suitable small Qwen MLX variant (adjust if exact 3.6-2B available)
+          python -m mlx_lm.generate \
+            --model mlx-community/Qwen3.5-2B-4bit \
+            --prompt "Explain tokens per second benchmarking on Apple Silicon in detail." \
+            --max-tokens 256 \
+            --temp 0.0 \
+            --seed 42 \
+            --verbose
+
+      - name: Summary & System Info
+        run: |
+          echo "System Info:"
+          sysctl -n machdep.cpu.brand_string
+          sysctl -n hw.memsize
+          python -c "
+          import platform, mlx.core as mx
+          print('Python:', platform.python_version())
+          print('MLX devices:', mx.devices())
+          print('Unified memory available for models.')
+          "
