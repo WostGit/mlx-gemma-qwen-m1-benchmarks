@@ -1,4 +1,4 @@
-name: Apple Silicon LLM Benchmarks (Gemma4-E2B + Qwen3.6-2B)
+name: Apple Silicon LLM Benchmarks (Gemma4-E2B + Qwen2.5)
 
 on:
   push:
@@ -40,23 +40,20 @@ jobs:
       - name: Benchmark Gemma-4-E2B (MLX 4-bit)
         run: |
           echo "=== Gemma-4-E2B-it 4-bit ==="
-          mlx_lm.generate \
-            --model mlx-community/gemma-4-e2b-it-4bit \
-            --prompt "Explain tokens per second benchmarking on Apple Silicon in detail." \
-            --max-tokens 256 \
-            --temp 0.0 \
-            --seed 42
+          python -c "
+          from mlx_lm import load, generate
+          model, tokenizer = load('mlx-community/gemma-4-e2b-it-4bit', strict=False)
+          response = generate(model, tokenizer, prompt='Explain tokens per second benchmarking on Apple Silicon in detail.', max_tokens=256, temp=0.0, verbose=True)
+          "
 
-      - name: Benchmark Qwen3.6-2B (or closest 2B variant, MLX)
+      - name: Benchmark Qwen2.5-1.5B (MLX 4-bit)
         run: |
-          echo "=== Qwen ~2B (Qwen3.5-2B or Qwen3-2B equivalent) ==="
-          # Use a suitable small Qwen MLX variant (adjust if exact 3.6-2B available)
-          mlx_lm.generate \
-            --model mlx-community/Qwen3.5-2B-4bit \
-            --prompt "Explain tokens per second benchmarking on Apple Silicon in detail." \
-            --max-tokens 256 \
-            --temp 0.0 \
-            --seed 42
+          echo "=== Qwen2.5-1.5B-Instruct 4-bit ==="
+          python -c "
+          from mlx_lm import load, generate
+          model, tokenizer = load('mlx-community/Qwen2.5-1.5B-Instruct-4bit', strict=False)
+          response = generate(model, tokenizer, prompt='Explain tokens per second benchmarking on Apple Silicon in detail.', max_tokens=256, temp=0.0, verbose=True)
+          "
 
       - name: Summary & System Info
         run: |
