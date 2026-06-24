@@ -1,4 +1,4 @@
-name: Apple Silicon LLM Benchmarks (Gemma4-E2B + Qwen2.5)
+name: Apple Silicon LLM Benchmarks (Gemma4-E2B + Qwen3.5-2B)
 
 on:
   push:
@@ -46,15 +46,14 @@ jobs:
             --max-tokens 256 \
             --temperature 0.0
 
-      - name: Benchmark Qwen2.5-1.5B (MLX 4-bit)
+      - name: Benchmark Qwen3.5-2B (MLX 4-bit)
         run: |
-          echo "=== Qwen2.5-1.5B-Instruct 4-bit ==="
-          mlx_lm.generate \
-            --model mlx-community/Qwen2.5-1.5B-Instruct-4bit \
+          echo "=== Qwen3.5-2B-4bit ==="
+          python -m mlx_vlm.generate \
+            --model mlx-community/Qwen3.5-2B-4bit \
             --prompt "Explain tokens per second benchmarking on Apple Silicon in detail." \
             --max-tokens 256 \
-            --temp 0.0 \
-            --seed 42
+            --temperature 0.0
 
       - name: Summary & System Info
         run: |
@@ -64,6 +63,6 @@ jobs:
           python -c "
           import platform, mlx.core as mx
           print('Python:', platform.python_version())
-          print('MLX devices:', mx.devices())
+          print('MLX Default Device:', mx.default_device())
           print('Unified memory available for models.')
           "
